@@ -1,0 +1,6 @@
+# Python dependencies for local Whisper transcription
+openai-whisper
+torch
+torchaudio
+numpy
+ffmpeg-python

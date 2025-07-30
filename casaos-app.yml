@@ -1,0 +1,50 @@
+name: HushDrop Audio Transcriber
+services:
+  hushdrop:
+    image: hushdrop:pi4
+    container_name: hushdrop
+    ports:
+      - "3001:3001"  # Single port - frontend and API on same port
+    volumes:
+      - whisper-models:/app/.cache/whisper  # Updated cache path
+      - uploads-data:/app/uploads
+      - /DATA/AppData/hushdrop/data:/app/data  # CasaOS data directory
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - XDG_CACHE_HOME=/app/.cache  # Whisper cache environment
+      - WHISPER_CACHE_DIR=/app/.cache/whisper
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s  # Extra time for Pi 4 and model download
+
+volumes:
+  whisper-models:
+    driver: local
+  uploads-data:
+    driver: local
+
+# CasaOS specific configuration
+x-casaos:
+  architectures:
+    - arm64
+  main: hushdrop
+  description: 
+    en_us: "Audio transcription and summarization app using local Whisper and OpenAI"
+  tagline:
+    en_us: "Private audio transcription with AI summaries"
+  developer: "Your Name"
+  author: "Your Name"
+  icon: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/whisper.png"
+  screenshot_link:
+    - "https://via.placeholder.com/800x600?text=HushDrop+Screenshot"
+  thumbnail: "https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/whisper.png"
+  title:
+    en_us: "HushDrop"
+  category: "Utilities"
+  port_map: "3001"

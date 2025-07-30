@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  app:
+    image: hushdrop:pi4  # Use the transferred image
+    container_name: hushdrop
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - whisper-models:/root/.cache/whisper
+      - uploads-data:/app/uploads
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+volumes:
+  whisper-models:
+    driver: local
+  uploads-data:
+    driver: local
